@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Memory Card Game</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Memory Card Game</h1>
+      <button id="restartButton">Restart Game</button>
+    </header>
+
+    <div class="game-board" id="gameBoard"></div>
+
+    <script>
+      const cardSymbols = [
+        "img1.png",
+        "img2.png",
+        "img3.png",
+        "img4.png",
+        "img5.png",
+        "img6.png",
+        "img7.png",
+        "img8.png",
+      ];
+      let cards = cardSymbols.concat(cardSymbols); 
+      let flippedCards = [];
+      let matchedCards = [];
+      let lockBoard = false;
+
+      const gameBoard = document.getElementById("gameBoard");
+      const restartButton = document.getElementById("restartButton");
+
+      // shuffle the cards in the cards array 
+      function shuffleCards() {
+        cards.sort(function () {
+          return 0.5 - Math.random();
+        });
+      }
+    
+      // creating the card as random 
+      function createBoard() {
+        gameBoard.innerHTML = ""; 
+        cards.forEach(function (symbol) {
+          const card = document.createElement("div");
+          card.classList.add("card");
+          card.innerHTML = `
+            <div class="front">
+              <img src="${symbol}" alt="Card Image" />
+            </div>
+            <div class="back"></div>
+          `;
+          card.addEventListener("click", flipCard); 
+          gameBoard.appendChild(card);
+        });
+      }
+
+      // checking the fliped card and its count 
+      function flipCard() {
+        if (lockBoard) return;
+        if (this === flippedCards[0]) return;
+
+        this.classList.add("flip");
+        flippedCards.push(this); 
+
+        if (flippedCards.length === 2) {
+          checkForMatch(); 
+        }
+      }
+
+      // checking for the matched cards 
+      function checkForMatch() {
+        lockBoard = true;
+        const firstCard = flippedCards[0];
+        const secondCard = flippedCards[1];
+        const firstSymbol = firstCard.querySelector("img").src;
+        const secondSymbol = secondCard.querySelector("img").src;
+
+        if (firstSymbol === secondSymbol) {
+          matchedCards.push(firstCard, secondCard);
+          resetFlip();
+          checkForWin(); 
+        }
+        else {
+          setTimeout(function () {
+            firstCard.classList.remove("flip");
+            secondCard.classList.remove("flip");
+            resetFlip();
+          }, 1000); 
+        }
+      }
+
+      // resetting the fliped cards 
+      function resetFlip() {
+        flippedCards = []; 
+        lockBoard = false; 
+      }
+
+      // restart section 
+      function restartGame() {
+        matchedCards = [];
+        flippedCards = [];
+        lockBoard = false;
+        shuffleCards();
+        createBoard();
+      }
+
+      // try_Again Section
+      function checkForWin() {
+        if (matchedCards.length === cards.length) {
+          const result = document.getElementById("gameBoard");
+          result.innerHTML = "<p>Hurray!! You have completed the game</p>";
+          const tryAgain = document.createElement("button");
+          tryAgain.textContent = "Try Again";
+          tryAgain.style.margin = "20px auto";
+          tryAgain.style.padding = "10px 20px";
+          tryAgain.style.fontSize = "16px";
+          tryAgain.style.cursor = "pointer";
+          tryAgain.addEventListener("mouseover", function () {
+            tryAgain.style.backgroundColor = "green";
+            tryAgain.style.color = "white";
+          });
+          tryAgain.addEventListener("mouseout", function () {
+            tryAgain.style.backgroundColor = "initial";
+            tryAgain.style.color = "initial";
+          });
+          tryAgain.addEventListener("click", restartGame);
+          result.appendChild(tryAgain);
+        }
+      }
+
+      // Event listener for the restart button
+      restartButton.addEventListener("click", restartGame);
+
+      // Initialize the game
+      shuffleCards();
+      createBoard();
+    </script>
+  </body>
+</html>
